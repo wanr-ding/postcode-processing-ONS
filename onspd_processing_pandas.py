@@ -6,7 +6,7 @@ start_time = time.time()
 # Load the main ONS postcode data with GSS codes
 df_pc = pd.read_csv("data/raw/ONSPD_AUG_2025_UK.csv")
 # Select relevant columns
-df_pc = df_pc[["pcds", "ctry25cd", "rgn25cd", "cty25cd", "ruc11ind", "ruc21ind", "lat", "long"]]
+df_pc = df_pc[["pcds", "ctry25cd", "rgn25cd", "cty25cd", "ruc11ind", "ruc21ind", "lad25cd", "lat", "long"]]
 
 # load lookup tables: country, region, county
 df_country = pd.read_csv('data/raw/CTRY Country names and codes UK as at 05_25.csv', usecols=['CTRY25CD', 'CTRY25NM'])
@@ -27,20 +27,28 @@ df_pc = df_pc.merge(df_region, left_on='rgn25cd', right_on='RGN25CD', how='left'
 df_pc = df_pc.merge(df_county, left_on='cty25cd', right_on='CTY25CD', how='left')
 df_pc = df_pc.merge(df_ruc21, left_on='ruc21ind', right_on='RUC21IND', how='left')
 
+df_lad = pd.read_csv('data/raw/population_density_2021_4.csv')
+df_pc = df_pc.merge(df_lad, left_on='lad25cd', right_on='Lower Tier Local Authorities Code', how='left')
+
 # Select and reorder columns for the final output
-df_pc = df_pc[["pcds", "CTRY25NM", "RGN25NM", "CTY25NM", "RUC21DESC", "Urban_rural_flag", "lat", "long"]]
+df_pc = df_pc[["pcds", "CTRY25NM", "RGN25NM", "CTY25NM", "RUC21DESC", "Urban_rural_flag", "lat", "long", "Lower Tier Local Authorities", "Observation"]]
 
 rename_columns = {
     "pcds": "postcode",
     "CTRY25NM": "country",
     "RGN25NM": "region",
     "CTY25NM": "county",
-    "RUC21DESC": "rural_urban_classification"
+    "RUC21DESC": "rural_urban_classification",
+    "Urban_rural_flag": "rural_urban_flag", 
+    "lat": "latitude", 
+    "long": "longitude",
+    "Lower Tier Local Authorities": "lower_tier_local_authorities",
+    "Observation": "population_density"
 }
 df_pc = df_pc.rename(columns=rename_columns)
 
 # Save the processed dataframe to a new CSV file
-df_pc.to_csv('data/output/ons_postcode_processed.csv', index=False)
+df_pc.to_csv('data/output/ons_postcode_processed_with_density.csv', index=False)
 
 end_time = time.time()
 print(f"Processing time: {end_time-start_time:.2f} seconds")

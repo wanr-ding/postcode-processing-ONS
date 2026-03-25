@@ -30,6 +30,15 @@ df_pc = df_pc.merge(df_ruc21, left_on='ruc21ind', right_on='RUC21IND', how='left
 # Select and reorder columns for the final output
 df_pc = df_pc[["pcds", "CTRY25NM", "RGN25NM", "CTY25NM", "RUC21DESC", "Urban_rural_flag", "lat", "long"]]
 
+rename_columns = {
+    "pcds": "postcode",
+    "CTRY25NM": "country",
+    "RGN25NM": "region",
+    "CTY25NM": "county",
+    "RUC21DESC": "rural_urban_classification"
+}
+df_pc = df_pc.rename(columns=rename_columns)
+
 # Save the processed dataframe to a new CSV file
 df_pc.to_csv('data/output/ons_postcode_processed.csv', index=False)
 
